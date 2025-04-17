@@ -17,6 +17,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // Скрываем поля PostgreSQL при старте (т.к. выбрана SQLite)
+    togglePostgreSQLFields(false);
+
+    // Подключаем сигналы радиокнопок
+    connect(ui->rbSQLite, &QRadioButton::toggled, this, &MainWindow::onDatabaseTypeToggled);
+    connect(ui->rbPostgreSQL, &QRadioButton::toggled, this, &MainWindow::onDatabaseTypeToggled);
+
     // Настройка соединений
     connect(ui->btnConnect, &QPushButton::clicked, this, &MainWindow::onConnectToDatabase);
     connect(ui->btnDisconnect, &QPushButton::clicked, this, &MainWindow::onDisconnectFromDatabase);
@@ -257,4 +264,33 @@ void MainWindow::onBrowseClicked() {
 void MainWindow::showError(const QString &message)
 {
     QMessageBox::critical(this, "Error", message);
+}
+
+void MainWindow::onDatabaseTypeToggled(bool checked)
+{
+    if (!checked) return;  // Игнорируем сигнал "отжатия"
+
+    // Если выбрана SQLite, скрываем поля PostgreSQL, и наоборот
+    bool isPostgreSQL = ui->rbPostgreSQL->isChecked();
+    togglePostgreSQLFields(isPostgreSQL);
+}
+
+void MainWindow::togglePostgreSQLFields(bool show)
+{
+    // Поля PostgreSQL
+    ui->lblPGHost->setVisible(show);
+    ui->lePGHost->setVisible(show);
+    ui->lblPGDatabase->setVisible(show);
+    ui->lePGDatabase->setVisible(show);
+    ui->lblPGUser->setVisible(show);
+    ui->lePGUser->setVisible(show);
+    ui->lblPGPassword->setVisible(show);
+    ui->lePGPassword->setVisible(show);
+    ui->lblPGPort->setVisible(show);
+    ui->sbPGPort->setVisible(show);
+
+    // Поля SQLite
+    ui->lblSQLitePath->setVisible(!show);
+    ui->leSQLitePath->setVisible(!show);
+    ui->btnBrowse->setVisible(!show);
 }

@@ -27,7 +27,7 @@ private slots:
     void onBrowseClicked();
     void onOpenQueryBuilder();  // Новый слот
     void saveToHistory(const QString &query);  // Для истории запросов
-    
+    void onDatabaseTypeToggled(bool checked);  // Новый слот для переключения типа БД
 
 private:
     void updateConnectionsList();
@@ -36,8 +36,9 @@ private:
     void showError(const QString &message);
     void loadHistory();
     void saveHistory();
+    void togglePostgreSQLFields(bool show);  // ← ВАЖНО: добавили объявление здесь
+
     QList<QString> m_queryHistory;
-    
 
     Ui::MainWindow *ui;
     DatabaseManager *dbManager;
