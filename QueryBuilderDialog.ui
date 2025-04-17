@@ -16,12 +16,6 @@
      <item>
       <widget class="QComboBox" name="comboMainTable"/>
      </item>
-     <item>
-      <widget class="QComboBox" name="comboJoinTable"/>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboJoinType"/>
-     </item>
     </layout>
    </item>
    <item>
@@ -30,28 +24,7 @@
       <widget class="QListWidget" name="listColumns"/>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="joinsLayout">
-       <item>
-        <widget class="QListWidget" name="listJoins"/>
-       </item>
-       <item>
-        <widget class="QListWidget" name="listConditions"/>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="joinControlLayout">
-     <item>
-      <widget class="QLineEdit" name="editJoinCondition"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnAddJoin">
-       <property name="text">
-        <string>Добавить JOIN</string>
-       </property>
-      </widget>
+      <widget class="QListWidget" name="listConditions"/>
      </item>
     </layout>
    </item>
@@ -76,6 +49,13 @@
     <widget class="QPushButton" name="btnGenerate">
      <property name="text">
       <string>Сгенерировать SQL</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btnCopy">
+     <property name="text">
+      <string>Скопировать SQL</string>
      </property>
     </widget>
    </item>

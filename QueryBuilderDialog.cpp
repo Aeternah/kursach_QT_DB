@@ -1,31 +1,29 @@
 #include "QueryBuilderDialog.h"
+#include <QClipboard>
 #include "ui_QueryBuilderDialog.h"
 
 QueryBuilderDialog::QueryBuilderDialog(DatabaseManager *dbManager, const QString &connectionName, QWidget *parent)
     : QDialog(parent), ui(new Ui::QueryBuilderDialog), m_dbManager(dbManager), m_connectionName(connectionName) {
     ui->setupUi(this);
-    
-    // Настройка интерфейса
-    ui->comboJoinType->addItems({"INNER JOIN", "LEFT JOIN", "RIGHT JOIN"});
+
     refreshTables();
-    
+
     // Соединения сигналов
     connect(ui->comboMainTable, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &QueryBuilderDialog::onTableSelected);
-    connect(ui->btnAddJoin, &QPushButton::clicked,
-            this, &QueryBuilderDialog::onAddJoinClicked);
     connect(ui->btnAddCondition, &QPushButton::clicked,
             this, &QueryBuilderDialog::onAddConditionClicked);
     connect(ui->btnGenerate, &QPushButton::clicked,
             this, &QueryBuilderDialog::onGenerateQuery);
+    connect(ui->btnCopy, &QPushButton::clicked,
+            this, &QueryBuilderDialog::onCopyClicked);
+        
 }
 
 void QueryBuilderDialog::refreshTables() {
     ui->comboMainTable->clear();
-    ui->comboJoinTable->clear();
     QStringList tables = m_dbManager->getTables(m_connectionName);
     ui->comboMainTable->addItems(tables);
-    ui->comboJoinTable->addItems(tables);
 }
 
 void QueryBuilderDialog::onTableSelected(int index) {
@@ -38,15 +36,6 @@ void QueryBuilderDialog::onTableSelected(int index) {
     }
 }
 
-void QueryBuilderDialog::onAddJoinClicked() {
-    QString joinTable = ui->comboJoinTable->currentText();
-    QString condition = ui->editJoinCondition->text();
-    if (!joinTable.isEmpty() && !condition.isEmpty()) {
-        m_joins.append(qMakePair(joinTable, condition));
-        ui->listJoins->addItem(QString("%1 ON %2").arg(joinTable).arg(condition));
-    }
-}
-
 void QueryBuilderDialog::onAddConditionClicked() {
     QString condition = ui->editCondition->text();
     if (!condition.isEmpty()) {
@@ -54,6 +43,14 @@ void QueryBuilderDialog::onAddConditionClicked() {
         ui->listConditions->addItem(condition);
     }
 }
+void QueryBuilderDialog::onCopyClicked() {
+    QString query = ui->textQuery->toPlainText();
+    if (!query.isEmpty()) {
+        QClipboard *clipboard = QApplication::clipboard();
+        clipboard->setText(query);
+    }
+}
+
 
 void QueryBuilderDialog::onGenerateQuery() {
     QString mainTable = ui->comboMainTable->currentText();
@@ -63,26 +60,18 @@ void QueryBuilderDialog::onGenerateQuery() {
             columns << ui->listColumns->item(i)->text();
         }
     }
-    
-    // Формируем SQL
+
+
     QString query = "SELECT ";
     query += columns.isEmpty() ? "*" : columns.join(", ");
     query += " FROM " + mainTable;
-    
-    // Добавляем JOIN
-    for (const auto &join : m_joins) {
-        query += " " + join.first + " ON " + join.second;
-    }
-    
-    // Добавляем WHERE
+
     if (!m_conditions.isEmpty()) {
         query += " WHERE " + m_conditions.join(" AND ");
     }
-    
+
     ui->textQuery->setPlainText(query);
 }
-
-// === ДОБАВЛЕННЫЕ МЕТОДЫ ===
 
 QueryBuilderDialog::~QueryBuilderDialog() {
     delete ui;

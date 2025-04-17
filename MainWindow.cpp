@@ -241,9 +241,18 @@ void MainWindow::updateQueryResults(QSqlQuery query)
 }
 
 void MainWindow::onBrowseClicked() {
-    // Здесь твоя логика для кнопки "Обзор"
-    qDebug() << "Кнопка 'Обзор' нажата";
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        tr("Выбрать файл базы данных"),
+        QString(),
+        tr("Базы данных SQLite (*.sqlite *.db);;Все файлы (*)")
+    );
+
+    if (!filePath.isEmpty()) {
+        ui->leSQLitePath->setText(filePath);
+    }
 }
+
 
 void MainWindow::showError(const QString &message)
 {

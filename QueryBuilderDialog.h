@@ -18,17 +18,17 @@ public:
 
 private slots:
     void onTableSelected(int index);
-    void onAddJoinClicked();
     void onAddConditionClicked();
     void onGenerateQuery();
+    void onCopyClicked();
+
 
 private:
     void refreshTables();
-    void refreshColumns();
+    
     Ui::QueryBuilderDialog *ui;
     DatabaseManager *m_dbManager;
     QString m_connectionName;
-    QList<QPair<QString, QString>> m_joins; // Пары (таблица, условие JOIN)
     QList<QString> m_conditions; // Условия WHERE
 };
 
