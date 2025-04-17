@@ -1,11 +1,14 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include "QueryBuilderDialog.h"
 #include <QMessageBox>
 #include <QSqlQueryModel>
 #include <QFileDialog>
 #include <QTextStream>
-#include <QSqlError>  // Для QSqlError
-#include <QSqlRecord>
+#include <QSettings>
+#include <QListWidgetItem>
+#include <QSqlError>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -14,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // Connect signals and slots
+    // Настройка соединений
     connect(ui->btnConnect, &QPushButton::clicked, this, &MainWindow::onConnectToDatabase);
     connect(ui->btnDisconnect, &QPushButton::clicked, this, &MainWindow::onDisconnectFromDatabase);
     connect(ui->btnExecute, &QPushButton::clicked, this, &MainWindow::onExecuteQuery);
@@ -23,6 +26,26 @@ MainWindow::MainWindow(QWidget *parent) :
             this, &MainWindow::onConnectionSelected);
     connect(ui->cbTables, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &MainWindow::onTableSelected);
+    
+
+    // Новые соединения для конструктора и истории
+    connect(ui->btnQueryBuilder, &QPushButton::clicked, this, &MainWindow::onOpenQueryBuilder);
+    connect(ui->btnClearHistory, &QPushButton::clicked, [this]() {
+        m_queryHistory.clear();
+        ui->listQueryHistory->clear();
+        saveHistory();
+    });
+    connect(ui->listQueryHistory, &QListWidget::itemClicked, [this](QListWidgetItem *item) {
+        ui->pteQuery->setPlainText(item->text());
+    });
+    // Соединение для кнопки "Обзор"
+connect(ui->btnBrowse, &QPushButton::clicked, this, &MainWindow::onBrowseClicked);
+
+    // Загрузка истории
+    loadHistory();
+    for (const QString &query : m_queryHistory) {
+        ui->listQueryHistory->addItem(query);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -90,6 +113,25 @@ void MainWindow::onExecuteQuery()
     
     QSqlQuery result = dbManager->executeQuery(queryText, connectionName);
     updateQueryResults(std::move(result));
+    
+    // Сохраняем запрос в историю
+    saveToHistory(queryText);
+}
+
+void MainWindow::onOpenQueryBuilder()
+{
+    QString connectionName = ui->cbConnections->currentText();
+    if (connectionName.isEmpty()) {
+        showError("No connection selected");
+        return;
+    }
+
+    QueryBuilderDialog dialog(dbManager, connectionName, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        QString query = dialog.generatedQuery();
+        ui->pteQuery->setPlainText(query);
+        saveToHistory(query);
+    }
 }
 
 void MainWindow::onConnectionSelected(int index)
@@ -125,14 +167,14 @@ void MainWindow::onExportToCSV()
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         
-        // Write headers
+        // Заголовки
         for (int col = 0; col < model->columnCount(); ++col) {
             if (col > 0) out << ",";
             out << "\"" << model->headerData(col, Qt::Horizontal).toString().replace("\"", "\"\"") << "\"";
         }
         out << "\n";
         
-        // Write data
+        // Данные
         for (int row = 0; row < model->rowCount(); ++row) {
             for (int col = 0; col < model->columnCount(); ++col) {
                 if (col > 0) out << ",";
@@ -146,6 +188,33 @@ void MainWindow::onExportToCSV()
     } else {
         showError("Failed to save file");
     }
+}
+
+void MainWindow::saveToHistory(const QString &query)
+{
+    if (query.isEmpty() || m_queryHistory.contains(query)) return;
+    
+    m_queryHistory.prepend(query);
+    if (m_queryHistory.size() > 50) m_queryHistory.removeLast();
+    
+    ui->listQueryHistory->clear();
+    for (const QString &q : m_queryHistory) {
+        ui->listQueryHistory->addItem(q);
+    }
+    
+    saveHistory();
+}
+
+void MainWindow::loadHistory()
+{
+    QSettings settings;
+    m_queryHistory = settings.value("queryHistory").toStringList();
+}
+
+void MainWindow::saveHistory()
+{
+    QSettings settings;
+    settings.setValue("queryHistory", m_queryHistory);
 }
 
 void MainWindow::updateConnectionsList()
@@ -169,6 +238,11 @@ void MainWindow::updateQueryResults(QSqlQuery query)
     if (model->lastError().isValid()) {
         showError(model->lastError().text());
     }
+}
+
+void MainWindow::onBrowseClicked() {
+    // Здесь твоя логика для кнопки "Обзор"
+    qDebug() << "Кнопка 'Обзор' нажата";
 }
 
 void MainWindow::showError(const QString &message)

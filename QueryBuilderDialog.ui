@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QueryBuilderDialog</class>
+ <widget class="QDialog" name="QueryBuilderDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="topLayout">
+     <item>
+      <widget class="QComboBox" name="comboMainTable"/>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboJoinTable"/>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboJoinType"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="centerLayout">
+     <item>
+      <widget class="QListWidget" name="listColumns"/>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="joinsLayout">
+       <item>
+        <widget class="QListWidget" name="listJoins"/>
+       </item>
+       <item>
+        <widget class="QListWidget" name="listConditions"/>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="joinControlLayout">
+     <item>
+      <widget class="QLineEdit" name="editJoinCondition"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnAddJoin">
+       <property name="text">
+        <string>Добавить JOIN</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="conditionControlLayout">
+     <item>
+      <widget class="QLineEdit" name="editCondition"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnAddCondition">
+       <property name="text">
+        <string>Добавить условие</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTextEdit" name="textQuery"/>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btnGenerate">
+     <property name="text">
+      <string>Сгенерировать SQL</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
